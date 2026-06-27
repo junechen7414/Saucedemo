@@ -211,7 +211,7 @@
           "Order"
         ],
         "summary": "建立新訂單",
-        "description": "建立新訂單。先驗證帳戶是否啟用（不啟用則拋出 AccountInactiveException），檢查訂單內是否有重複商品（重複則拋出 InvalidRequestException），最後透過商品服務處理庫存（若狀態不可銷售或庫存不足由商品服務拋出異常）。成功則新增訂單主檔（預設狀態 1001）與明細。",
+        "description": "建立新訂單。先驗證帳戶具下單資格（受 SQLRestriction 限制，停用或不存在的帳戶一律回傳 NotFound），檢查訂單內是否有重複商品（重複則拋出 InvalidRequestException），最後透過商品服務預留庫存（商品不可銷售視為 NotFound、庫存不足則拋出 ProductStockNotEnoughException）。成功則新增訂單主檔（預設狀態 1001）與明細。",
         "operationId": "createOrder",
         "requestBody": {
           "content": {
@@ -236,7 +236,7 @@
             }
           },
           "400": {
-            "description": "參數驗證失敗、帳戶未啟用、重複商品或庫存不足",
+            "description": "參數驗證失敗、重複商品或庫存不足",
             "content": {
               "*/*": {
                 "schema": {
@@ -246,7 +246,7 @@
             }
           },
           "404": {
-            "description": "帳戶或商品不存在",
+            "description": "帳戶不具下單資格或商品不存在",
             "content": {
               "*/*": {
                 "schema": {
@@ -480,19 +480,23 @@
         }
       }
     },
-    "/product/processOrderItems": {
+    "/product/reserve": {
       "post": {
         "tags": [
           "Product"
         ],
-        "summary": "處理訂單中的商品庫存",
-        "description": "內部使用：處理訂單建立/更新時的商品庫存扣除與歸還。",
-        "operationId": "processOrderItems",
+        "summary": "預留商品庫存",
+        "description": "內部使用：建立訂單時預留(reserve)商品庫存。",
+        "operationId": "reserveStock",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProcessOrderItemsRequest"
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/OrderItemRequest"
+                },
+                "uniqueItems": true
               }
             }
           },
@@ -500,7 +504,61 @@
         },
         "responses": {
           "200": {
-            "description": "處理成功"
+            "description": "預留成功"
+          }
+        }
+      }
+    },
+    "/product/release": {
+      "post": {
+        "tags": [
+          "Product"
+        ],
+        "summary": "釋放商品庫存",
+        "description": "內部使用：刪除訂單時釋放(release)商品庫存。",
+        "operationId": "releaseStock",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/OrderItemRequest"
+                },
+                "uniqueItems": true
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "釋放成功"
+          }
+        }
+      }
+    },
+    "/product/adjustStock": {
+      "post": {
+        "tags": [
+          "Product"
+        ],
+        "summary": "調整商品庫存",
+        "description": "內部使用：更新訂單時依新舊項目差值調整(adjust)商品庫存的預留量。",
+        "operationId": "adjustStock",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustStockRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "調整成功"
           }
         }
       }
@@ -782,6 +840,44 @@
           }
         }
       }
+    },
+    "/account/{id}/order-eligibility": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "驗證帳戶下單資格",
+        "description": "內部使用：驗證帳戶是否具下單資格。受限於 SQLRestriction 規則，停用或已軟刪除的帳戶查詢即不可見，故帳戶不存在、已軟刪除或狀態非啟用 \u0027Y\u0027 時一律回傳 NotFound。",
+        "operationId": "assertCanPlaceOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "帳戶 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "帳戶具下單資格"
+          },
+          "404": {
+            "description": "帳戶不存在或不可下單",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -969,21 +1065,21 @@
           }
         }
       },
-      "ProcessOrderItemsRequest": {
+      "AdjustStockRequest": {
         "type": "object",
-        "description": "處理訂單項目請求（內部使用）",
+        "description": "庫存調整請求（內部使用）：將庫存從 from 的預留狀態調整為 to 的預留狀態",
         "properties": {
-          "originalItems": {
+          "from": {
             "type": "array",
-            "description": "原始訂單項目集合",
+            "description": "調整前的訂單項目集合（原預留）",
             "items": {
               "$ref": "#/components/schemas/OrderItemRequest"
             },
             "uniqueItems": true
           },
-          "updatedItems": {
+          "to": {
             "type": "array",
-            "description": "更新後的訂單項目集合",
+            "description": "調整後的訂單項目集合（新預留）",
             "items": {
               "$ref": "#/components/schemas/OrderItemRequest"
             },
