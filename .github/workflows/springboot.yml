@@ -67,6 +67,8 @@ jobs:
           ORACLE_TEST_PASSWORD: ${{ secrets.DB_PASSWORD }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           IMAGE_TAG: ${{ steps.set-tag.outputs.IMAGE_TAG }}
+          API_USERNAME: ${{ secrets.API_USERNAME }}
+          API_PASSWORD: ${{ secrets.API_PASSWORD }}
         run: |
           echo "🚀 Starting environment with image tag: $IMAGE_TAG"
           # --wait 會等待 Dockerfile 中的 HEALTHCHECK 成功
@@ -101,6 +103,9 @@ jobs:
         env:
           # 指向剛啟動的 Docker 容器位址 (通常是 localhost:8787)
           BASE_URL: http://localhost:8787
+          # HTTP Basic 認證憑證：與後端容器同一組值，Playwright 據此送出 Authorization 標頭
+          API_USERNAME: ${{ secrets.API_USERNAME }}
+          API_PASSWORD: ${{ secrets.API_PASSWORD }}
           
       - name: Stop Environment
         if: always()
