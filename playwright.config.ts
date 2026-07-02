@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// 外部 API 呼叫端憑證：CI 由 GitHub Secrets 帶入，本機用預設值
+const API_USERNAME = process.env.API_USERNAME || 'api';
+const API_PASSWORD = process.env.API_PASSWORD || 'local-api-secret';
+const BASIC_AUTH = `Basic ${Buffer.from(`${API_USERNAME}:${API_PASSWORD}`).toString('base64')}`;
+
 /**
  * 建立時間戳記 (優化可讀性)
  */
@@ -63,7 +68,11 @@ export default defineConfig({
 			name: 'springboot-api',
 			testMatch: '**/springboot/*.spec.ts',
 			use: {
-				baseURL: 'http://localhost:8787/', // 對應你 docker-compose 的 port
+				baseURL: process.env.BASE_URL || 'http://localhost:8787/', // 對應你 docker-compose 的 port
+				// 每次請求主動帶 HTTP Basic 標頭，覆蓋全部測試與 fixtures，無 401→retry 往返
+				extraHTTPHeaders: {
+					Authorization: BASIC_AUTH,
+				},
 			},
 		},
 

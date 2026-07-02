@@ -13,6 +13,10 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-db:1521/FREEPDB1
       - SPRING_DATASOURCE_USERNAME=${ORACLE_TEST_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${ORACLE_TEST_PASSWORD}
+      # HTTP Basic 認證憑證：覆寫後端 app.auth.api-*，與 Playwright 送出的標頭同步
+      # 提供 fallback 預設值，避免 secret 未設定時傳入空字串觸發 @NotBlank 導致啟動失敗
+      - API_USERNAME=${API_USERNAME:-api}
+      - API_PASSWORD=${API_PASSWORD:-local-api-secret}
     networks:
       - test-net
     depends_on:
