@@ -1,13 +1,14 @@
 {
   "openapi": "3.1.0",
-  "info": {
-    "title": "OpenAPI definition",
-    "version": "v0"
-  },
   "servers": [
     {
       "url": "http://localhost:8787",
       "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
     }
   ],
   "tags": [
@@ -1475,6 +1476,13 @@
             "example": "Y"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "description": "機器帳號 HTTP Basic：使用者名稱為 app.auth.api-username（預設 api）。",
+        "scheme": "basic"
       }
     }
   }
