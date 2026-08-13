@@ -315,8 +315,9 @@ import { test } from '../../services/fixtures/chain-fixtures';
     "biome:check": "biome check .",
     "biome:fix": "biome check --write .",
     
-    // API 型別生成
-    "api-spec:update": "openapi-typescript http://localhost:8787/v3/api-docs -o services/schema/api-types.ts"
+    // API 型別生成（預設從跑起來的容器抓 spec；:file 改讀版控快照，離線用）
+    "api-spec:update": "curl -fsS http://localhost:8787/v3/api-docs -o ./docs/swagger.live.json && openapi-typescript ./docs/swagger.live.json -o ./services/schema/api-types.ts",
+    "api-spec:update:file": "openapi-typescript ./docs/swagger.json -o ./services/schema/api-types.ts"
   }
 }
 ```

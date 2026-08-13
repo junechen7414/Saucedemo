@@ -33,8 +33,9 @@ pnpm test:e2e:clean       # 清除產出物後執行 API 測試
 pnpm test:e2e:ci          # compose-restart + clean + API 測試 (完整 CI 流程)
 pnpm local-test-all       # 清除後執行所有 projects (UI + API)
 
-# 當 docs/swagger.json 變更後，重新產生 API 型別
-pnpm api-spec:update      # 產生 services/schema/api-types.ts
+# 重新產生 API 型別 -> services/schema/api-types.ts
+pnpm api-spec:update      # 從跑起來的容器抓 /v3/api-docs（需先 compose-up；CI 走這條）
+pnpm api-spec:update:file # 離線：改用版控裡的 docs/swagger.json 快照
 
 # 執行單一測試 / 子集 (直接使用 Playwright CLI)
 pnpm exec playwright test tests/api/springboot/order.spec.ts
@@ -54,7 +55,7 @@ pnpm exec playwright show-report playwright-report/<PW_DATE>
   - `pages/` —— Page Objects（`{name}-page.ts`，類別 `{Name}Page`）。公開方法為語意化的商業行為（`continueCheckout`、`verifyOrderCompletion`）；locator 保持私有。
   - `components/` —— 可重用 UI 元件（如 `hamburger-menu.ts`），組合進 Page Objects。
   - `apis/` —— `base-api-client.ts` 提供 `ApiRequester`（採組合而非繼承），回傳 `ApiResult<T>`，並提供 `expectOk` / `expectError` 斷言輔助函式；`springboot-api-client.ts` 封裝具體端點。
-  - `schema/` —— `api-types.ts` 由 `docs/swagger.json` **自動產生**（請勿手動編輯）；另有 `constants.ts`、`common-types.ts`。
+  - `schema/` —— `api-types.ts` 由被測容器的 `/v3/api-docs` **自動產生**（請勿手動編輯，見 `api-spec:update`）；另有 `constants.ts`、`common-types.ts`。
   - `fixtures/` —— 依賴注入層（見下方）。
 
 ### Fixtures 是組合的核心

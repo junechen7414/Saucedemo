@@ -13,9 +13,24 @@ pnpm run api-spec:update
 ```
 
 這個指令會：
-1. 從 `http://localhost:8787/v3/api-docs` 取得 Swagger 規格
+1. 從 `http://localhost:8787/v3/api-docs` 取得 Swagger 規格（存成 `docs/swagger.live.json`，不入版控）
 2. 生成 TypeScript 型別定義
 3. 儲存到 `services/schema/api-types.ts`
+
+因此執行前需要先 `pnpm run compose-up` 把後端容器帶起來。沒有容器可用時，改跑
+`pnpm run api-spec:update:file`，它讀版控裡的 `docs/swagger.json` 快照。
+
+### 為什麼從容器抓，而不是直接讀 docs/swagger.json
+
+`docs/swagger.json` 是上游 SpringBoot repo 的 CI 推過來的**快照**，它必然落後被測 image：
+上游 workflow 是在 build-and-push job 裡就 dispatch 本 repo 的 E2E，而同步 swagger 是**後續**
+的 job，所以 E2E 開跑時 checkout 到的還是上一版 spec。手動 `workflow_dispatch` 指定舊 image
+時錯配更明顯——檔案永遠是 main 最新的，image 卻是舊的。
+
+規格的正確來源是**被測的那個 artifact 自己**：image 吐出來的 `/v3/api-docs` 定義上就同步，
+三種觸發路徑（`repository_dispatch` / `workflow_dispatch` / PR 貼標籤）一次全對。`docs/swagger.json`
+則保留為 API 變更的可讀記錄（在本 repo 看得到後端何時改了什麼），CI 會比對兩者並在
+job summary 提示落差，但不阻擋測試。
 
 ### 使用範例
 

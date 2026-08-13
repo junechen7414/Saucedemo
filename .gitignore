@@ -7,3 +7,7 @@ node_modules/
 
 .bob
 .agents
+
+# 從被測容器現抓的 OpenAPI spec（api-spec:update 的暫存檔）。
+# 版控中的 API 記錄是 docs/swagger.json，由上游 SpringBoot repo 的 CI 同步。
+docs/swagger.live.json

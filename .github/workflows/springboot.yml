@@ -95,8 +95,35 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Update API Types from Swagger
+      # 型別要對準「正在被測的那個 image」，因此 spec 直接從剛啟動的容器抓
+      # （/v3/api-docs 在 SecurityConfig 是 permitAll，不需帶認證）。
+      #
+      # 不能改用版控裡的 docs/swagger.json：那份是上游 SpringBoot repo 推過來的快照，
+      # 且上游的推送發生在它 dispatch 本 workflow 之後（同步是另一個 job），
+      # 所以自動觸發時它必定落後被測 image 一版；workflow_dispatch 指定舊 image 時更是直接錯配。
+      - name: Update API Types from Live Spec
         run: pnpm run api-spec:update
+
+      # 純提示、不阻擋：測試已經用 live spec，這一步只是讓「版控快照落後」這件事看得見。
+      - name: Check committed swagger.json against live spec
+        run: |
+          if diff -u <(jq -S . docs/swagger.json) <(jq -S . docs/swagger.live.json) > spec-drift.diff; then
+            echo "✅ \`docs/swagger.json\` 與被測 image 的 spec 一致" >> $GITHUB_STEP_SUMMARY
+          else
+            {
+              echo "### ⚠️ \`docs/swagger.json\` 與被測 image 的 spec 不一致"
+              echo ""
+              echo "測試使用的是 image 的 live spec，本步驟不影響結果；下次上游推 main 時快照就會補上。"
+              echo ""
+              echo "<details><summary>差異</summary>"
+              echo ""
+              echo '```diff'
+              head -c 60000 spec-drift.diff
+              echo '```'
+              echo ""
+              echo "</details>"
+            } >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Run Playwright tests
         run: pnpm playwright test --project=springboot-api
@@ -116,5 +143,10 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
-          path: playwright-report/
+          # 一併留下實際用來產生型別的 spec 與它跟版控快照的差異，
+          # 失敗時才能確認「當時到底是對哪一份 spec 測的」。
+          path: |
+            playwright-report/
+            docs/swagger.live.json
+            spec-drift.diff
           retention-days: 30
