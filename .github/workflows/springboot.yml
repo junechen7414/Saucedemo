@@ -105,15 +105,41 @@ jobs:
         run: pnpm run api-spec:update
 
       # 純提示、不阻擋：測試已經用 live spec，這一步只是讓「版控快照落後」這件事看得見。
+      #
+      # 這裡的差異**幾乎總是預期行為**（完整讀法見 docs/agents/13-advanced-techniques.md）：
+      # 上游 image-publish.yml 的 dispatch 是 build-and-push 的最後一步，而同步 docs/swagger.json
+      # 的 generate-docs 是 needs: build-and-push，所以快照 commit 必定晚於本 workflow 的 checkout
+      # （2026-08-13 實測 63 秒）。上游只要改了 API 契約，這裡就一定出現一次差異。
+      # 因此訊息刻意不用 ⚠️ —— 用 ⚠️ 標記一個「每次改 API 都會出現」的東西，只會訓練大家忽略它。
+      # 唯一該追的異常：連續多次「上游 push main」觸發都出現**相同**差異 → 上游 generate-docs
+      # 沒推成功，去查上游 run。
       - name: Check committed swagger.json against live spec
+        env:
+          # 上游 dispatch 時把它自己的觸發事件放進 payload（push / pull_request），
+          # 用來區分「快照晚 60 秒」與「這個 image 根本不會有快照」兩種情況。
+          UPSTREAM_EVENT: ${{ github.event.client_payload.event_name }}
         run: |
           if diff -u <(jq -S . docs/swagger.json) <(jq -S . docs/swagger.live.json) > spec-drift.diff; then
-            echo "✅ \`docs/swagger.json\` 與被測 image 的 spec 一致" >> $GITHUB_STEP_SUMMARY
+            echo "✅ 版控快照 \`docs/swagger.json\` 與被測 image 的 spec 一致" >> $GITHUB_STEP_SUMMARY
           else
             {
-              echo "### ⚠️ \`docs/swagger.json\` 與被測 image 的 spec 不一致"
+              echo "### ℹ️ 版控快照與被測 image 的 spec 有差異（預期行為，不影響測試結果）"
               echo ""
-              echo "測試使用的是 image 的 live spec，本步驟不影響結果；下次上游推 main 時快照就會補上。"
+              echo "測試型別取自被測 image 的 live spec，本步驟純提示、不阻擋。差異的來源："
+              echo ""
+              if [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ] && [ "$UPSTREAM_EVENT" = "push" ]; then
+                echo "**上游這次 push 變更了 API 契約。** 上游在 \`build-and-push\` 的最後一步就 dispatch 本 workflow，"
+                echo "而同步 \`docs/swagger.json\` 的 \`generate-docs\` 是後續 job，所以本 run checkout 到的必然是上一版"
+                echo "快照（實測落後約 60 秒）。快照隨後就會補上，**下次自動觸發即為 ✅**；下方差異就是這次的 API 變更內容。"
+                echo ""
+                echo "> 只有連續多次自動觸發都出現**相同**差異才算異常 —— 那代表上游 \`generate-docs\` 沒把快照推過來，請查上游 run。"
+              elif [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then
+                echo "**上游是從 PR（而非 push \`main\`）觸發的。** 上游的 \`generate-docs\` 只在 push \`main\` 時執行，"
+                echo "因此這個 image 的 spec 不會有對應快照，差異會一直存在到該 PR 合併為止 —— 正常現象。"
+              else
+                echo "**手動或本 repo PR 觸發。** 快照對應上游最新 \`main\`，被測 image 由 image tag 指定，"
+                echo "兩者沒有版本關聯，差異僅供參考。"
+              fi
               echo ""
               echo "<details><summary>差異</summary>"
               echo ""

@@ -46,6 +46,8 @@ pnpm exec playwright show-report playwright-report/<PW_DATE>
 
 需要一個含 `ORACLE_TEST_USERNAME` / `ORACLE_TEST_PASSWORD` 的 `.env`（參考 `.env.example`）。執行 API 測試前需先啟動容器堆疊（`pnpm compose-up`），或使用會先重啟堆疊的 `pnpm test:e2e:ci`。
 
+CI job summary 常出現「版控快照 `docs/swagger.json` 與被測 image 的 spec 有差異」—— **那是預期行為**（上游同步快照的 job 排在 dispatch 之後，必定慢一步），型別是從被測容器的 live spec 產生的，不影響測試。三種觸發各自的讀法與唯一該追的異常見 [`docs/agents/13-advanced-techniques.md`](docs/agents/13-advanced-techniques.md#怎麼讀-job-summary-的快照與-live-spec-有差異)。
+
 ## 架構
 
 三層架構 —— 測試層使用服務層，服務層封裝 Playwright API。測試應讀起來像商業流程，而非 UI/HTTP 操作。
