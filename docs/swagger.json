@@ -416,14 +416,38 @@
         "operationId": "getProductList",
         "parameters": [
           {
-            "name": "pageable",
+            "name": "page",
             "in": "query",
-            "description": "分頁參數（page\u003d頁碼從0開始, size\u003d每頁筆數, sort\u003d排序欄位,方向）",
-            "required": true,
+            "description": "Zero-based page index (0..N)",
+            "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            },
-            "example": "page\u003d0\u0026size\u003d20\u0026sort\u003did,asc"
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -574,14 +598,38 @@
         "operationId": "getAccountList",
         "parameters": [
           {
-            "name": "pageable",
+            "name": "page",
             "in": "query",
-            "description": "分頁參數（page\u003d頁碼從0開始, size\u003d每頁筆數, sort\u003d排序欄位,方向）",
-            "required": true,
+            "description": "Zero-based page index (0..N)",
+            "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            },
-            "example": "page\u003d0\u0026size\u003d20\u0026sort\u003did,asc"
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -783,14 +831,38 @@
             "example": 1
           },
           {
-            "name": "pageable",
+            "name": "page",
             "in": "query",
-            "description": "分頁參數（page\u003d頁碼從0開始, size\u003d每頁筆數, sort\u003d排序欄位,方向）",
-            "required": true,
+            "description": "Zero-based page index (0..N)",
+            "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            },
-            "example": "page\u003d0\u0026size\u003d20\u0026sort\u003did,asc"
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -1149,27 +1221,6 @@
         "required": [
           "name"
         ]
-      },
-      "Pageable": {
-        "type": "object",
-        "properties": {
-          "page": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 1
-          },
-          "sort": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
       },
       "GetProductListResponse": {
         "type": "object",
