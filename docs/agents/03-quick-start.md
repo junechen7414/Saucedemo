@@ -43,7 +43,8 @@ bash scripts/test-e2e-ci.sh
 | `pnpm run compose-restart` | 重啟測試環境 |
 | `pnpm run test:e2e` | 執行 API E2E 測試 |
 | `pnpm run test:e2e:ci` | 完整 CI/CD 測試流程（容器重啟） |
-| `pnpm run api-spec:update` | 從 Swagger 更新 API 型別定義 |
+| `pnpm run api-spec:update` | 從跑起來的容器（`/v3/api-docs`）更新 API 型別定義 |
+| `pnpm run api-spec:update:file` | 同上，但改讀版控裡的 `docs/swagger.json` 快照（離線用） |
 | `pnpm run biome:fix` | 自動修復程式碼格式問題 |
 
 ## 測試報告
