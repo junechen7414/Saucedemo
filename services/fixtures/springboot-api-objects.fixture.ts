@@ -1,4 +1,4 @@
-import { expectOk } from '@apis/base-api-client';
+import { expectCreated, expectOk } from '@apis/base-api-client';
 import { SpringbootApiClient } from '@apis/springboot-api-client';
 import { faker } from '@faker-js/faker';
 import { test as baseTest } from '@playwright/test';
@@ -54,7 +54,7 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 		// 在 fixture 中建立一筆帳號資料
 		const accountName = faker.person.fullName();
 		const response = await springbootApi.createAccount({ name: accountName });
-		const accountId = expectOk(response);
+		const accountId = expectCreated(response, '/account');
 
 		await use({ id: accountId, name: accountName, status: AccountStatus.Active });
 	},
@@ -67,7 +67,7 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 			available: 100,
 		};
 		const createResponse = await springbootApi.createProduct(productData);
-		const productId = expectOk(createResponse);
+		const productId = expectCreated(createResponse, '/product');
 
 		// 取得完整商品資訊
 		const getResponse = await springbootApi.getProduct(productId);
@@ -89,7 +89,7 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 			available: 50,
 		};
 		const product1Response = await springbootApi.createProduct(product1Data);
-		const product1Id = expectOk(product1Response);
+		const product1Id = expectCreated(product1Response, '/product');
 
 		// 取得完整商品資訊
 		const getProduct1 = await springbootApi.getProduct(product1Id);
@@ -101,7 +101,7 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 			available: 50,
 		};
 		const product2Response = await springbootApi.createProduct(product2Data);
-		const product2Id = expectOk(product2Response);
+		const product2Id = expectCreated(product2Response, '/product');
 
 		// 取得完整商品資訊
 		const getProduct2 = await springbootApi.getProduct(product2Id);
@@ -131,7 +131,7 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 			items: [{ productId: existingProduct.id, quantity: faker.number.int({ min: 1, max: 5 }) }],
 		};
 		const response = await springbootApi.createOrder(orderData);
-		const orderId = expectOk(response);
+		const orderId = expectCreated(response, '/order');
 
 		await use({
 			id: orderId,
@@ -144,14 +144,14 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 		// 建立一個有關聯訂單的帳戶
 		const accountName = faker.person.fullName();
 		const accountResponse = await springbootApi.createAccount({ name: accountName });
-		const accountId = expectOk(accountResponse);
+		const accountId = expectCreated(accountResponse, '/account');
 
 		// 為該帳戶建立訂單
 		const orderResponse = await springbootApi.createOrder({
 			accountId: accountId,
 			items: [{ productId: existingProduct.id, quantity: 1 }],
 		});
-		expectOk(orderResponse);
+		expectCreated(orderResponse, '/order');
 
 		await use({ id: accountId, name: accountName, status: AccountStatus.Active });
 	},
@@ -160,7 +160,7 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 		// 建立一個有多張訂單的帳戶
 		const accountName = faker.person.fullName();
 		const accountResponse = await springbootApi.createAccount({ name: accountName });
-		const accountId = expectOk(accountResponse);
+		const accountId = expectCreated(accountResponse, '/account');
 
 		// 建立多張訂單
 		const orderIds: number[] = [];
@@ -169,13 +169,13 @@ export const springbootApiTest = baseTest.extend<SpringbootApiFixtures>({
 			accountId: accountId,
 			items: [{ productId: existingProduct.id, quantity: 1 }],
 		});
-		orderIds.push(expectOk(order1Response));
+		orderIds.push(expectCreated(order1Response, '/order'));
 
 		const order2Response = await springbootApi.createOrder({
 			accountId: accountId,
 			items: [{ productId: existingProduct.id, quantity: 1 }],
 		});
-		orderIds.push(expectOk(order2Response));
+		orderIds.push(expectCreated(order2Response, '/order'));
 
 		await use({
 			id: accountId,

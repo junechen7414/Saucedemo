@@ -1,6 +1,6 @@
 import type { APIRequestContext } from '@playwright/test';
 import type { components, PageResponse } from '@schema/api-types';
-import { ApiRequester, type ApiResult } from './base-api-client';
+import { ApiRequester, type ApiResult, type CreatedResponse } from './base-api-client';
 
 type Schemas = components['schemas'];
 
@@ -34,8 +34,8 @@ export class SpringbootApiClient {
 	/**
 	 * Account 相關操作
 	 */
-	createAccount(payload: Schemas['CreateAccountRequest']): Promise<ApiResult<number>> {
-		return this.requester.post<number>(`${this.endpoints.account}`, { data: payload });
+	createAccount(payload: Schemas['CreateAccountRequest']): Promise<ApiResult<CreatedResponse>> {
+		return this.requester.post<CreatedResponse>(`${this.endpoints.account}`, { data: payload });
 	}
 
 	getAccount(id: number): Promise<ApiResult<Schemas['GetAccountDetailResponse']>> {
@@ -67,8 +67,8 @@ export class SpringbootApiClient {
 	/**
 	 * Product 相關操作
 	 */
-	createProduct(payload: Schemas['CreateProductRequest']): Promise<ApiResult<number>> {
-		return this.requester.post<number>(`${this.endpoints.product}`, { data: payload });
+	createProduct(payload: Schemas['CreateProductRequest']): Promise<ApiResult<CreatedResponse>> {
+		return this.requester.post<CreatedResponse>(`${this.endpoints.product}`, { data: payload });
 	}
 
 	getProduct(id: number): Promise<ApiResult<Schemas['GetProductDetailResponse']>> {
@@ -102,8 +102,8 @@ export class SpringbootApiClient {
 	/**
 	 * Order 相關操作
 	 */
-	createOrder(payload: Schemas['CreateOrderRequest']): Promise<ApiResult<number>> {
-		return this.requester.post<number>(`${this.endpoints.order}`, { data: payload });
+	createOrder(payload: Schemas['CreateOrderRequest']): Promise<ApiResult<CreatedResponse>> {
+		return this.requester.post<CreatedResponse>(`${this.endpoints.order}`, { data: payload });
 	}
 
 	getOrder(id: number): Promise<ApiResult<Schemas['GetOrderDetailResponse']>> {
@@ -124,8 +124,8 @@ export class SpringbootApiClient {
 		);
 	}
 
-	updateOrder(payload: Schemas['UpdateOrderRequest']): Promise<ApiResult<void>> {
-		return this.requester.put<void>(`${this.endpoints.order}`, { data: payload });
+	updateOrder(id: number, payload: Schemas['UpdateOrderRequest']): Promise<ApiResult<void>> {
+		return this.requester.put<void>(`${this.endpoints.order}/${id}`, { data: payload });
 	}
 
 	deleteOrder(id: number): Promise<ApiResult<void>> {

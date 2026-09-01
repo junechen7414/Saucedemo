@@ -4,760 +4,1521 @@
  */
 
 export interface paths {
-	'/product/{id}': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get: operations['getProductDetail'];
-		/**
-		 * 更新商品
-		 * @description 該ID商品若沒找到拋出NotFound例外，再檢查是否要更改成已經存在的商品名稱拋出特定例外，沒有則更新成功
-		 */
-		put: operations['updateProduct'];
-		post?: never;
-		/**
-		 * 刪除商品
-		 * @description 找不到商品或商品已經軟刪除過拋出NotFound，沒有則軟刪除
-		 */
-		delete: operations['deleteProduct'];
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/order': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		/**
-		 * 更新訂單內容
-		 * @description 不存在該訂單ID拋出NotFound，若商品狀態不可銷售拋出特定例外，再來若有商品庫存不足拋出特定例外，都沒更新商品庫存、訂單
-		 */
-		put: operations['updateOrder'];
-		/**
-		 * 建立新訂單
-		 * @description 帳戶狀態N拋出特定例外，之後若商品狀態不可銷售拋出特定例外，再來若商品庫存不足拋出特定例外，沒例外則更新商品庫存和新增訂單
-		 */
-		post: operations['createOrder'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/account/{id}': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get: operations['getAccountDetail'];
-		/**
-		 * 修改帳戶
-		 * @description 該ID帳戶不存在拋出NotFound例外，再檢查是否狀態從Y改成N，帳戶有關連到的訂單的話拋出例外，都沒事就更新成功
-		 */
-		put: operations['updateAccount'];
-		post?: never;
-		/**
-		 * 刪除帳戶
-		 * @description 找不到帳戶或帳戶已經軟刪除過拋出NotFound，如果仍關聯訂單拋出特定例外，沒有則軟刪除
-		 */
-		delete: operations['deleteAccount'];
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/product': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get: operations['getProductList'];
-		put?: never;
-		/**
-		 * 新增商品
-		 * @description 如果有同名商品拋出特定例外，沒有則新增成功
-		 */
-		post: operations['createProduct'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/product/processOrderItems': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * 處理訂單中的商品
-		 * @description 處理訂單中的商品資訊
-		 */
-		post: operations['processOrderItems'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/account': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get: operations['getAccountList'];
-		put?: never;
-		post: operations['createAccount'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/PlaywrightTestData/createOrderPrecondition': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		post: operations['createOrderPrecondition'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/product/batch': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get: operations['getProductBatch'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/order/{orderId}': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get: operations['getOrderDetails'];
-		put?: never;
-		post?: never;
-		/**
-		 * 刪除訂單
-		 * @description 訂單id不存在或狀態已經為1003取消拋出NotFound，都沒有則軟刪除更新OrderInfo的狀態資料欄位，真刪除OrderDetail並歸還商品庫存
-		 */
-		delete: operations['deleteOrder'];
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/order/account/{accountId}': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get: operations['getOrderList'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/order/account/{accountId}/exists': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * 檢查帳戶ID是否存在於任何訂單中
-		 * @description 判斷帳戶有沒有在訂單中，讓帳戶在更新狀態和刪除時檢核用，只在傳入的帳戶ID有關連訂單時回傳TRUE，傳入不存在和沒再訂單中的帳戶ID也回傳false
-		 */
-		get: operations['AccountIdIsInOrder'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
+    "/product/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 獲取單一商品詳細資訊
+         * @description 根據 ID 獲取商品詳細資訊。受限於 SQLRestriction 規則，若商品不存在、已軟刪除或銷售狀態非 1001 (AVAILABLE)，將回傳 NotFound。
+         */
+        get: operations["getProductDetail"];
+        /**
+         * 更新商品
+         * @description 更新現有商品資訊。受限於 SQLRestriction 規則，若商品 ID 不存在、已軟刪除或銷售狀態非 1001 (AVAILABLE)，將拋出 NotFound。若嘗試更改為已存在的商品名稱，則拋出 BusinessException（PRODUCT_ALREADY_EXIST）。
+         */
+        put: operations["updateProduct"];
+        post?: never;
+        /**
+         * 刪除商品
+         * @description 執行商品軟刪除。受限於 SQLRestriction 規則，若商品 ID 不存在、已軟刪除或銷售狀態非 1001 (AVAILABLE)，將拋出 NotFound。
+         */
+        delete: operations["deleteProduct"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/order/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 獲取訂單詳細資訊
+         * @description 獲取指定訂單的詳細資訊。受限於SQLRestriction規則，若訂單不存在、已被軟刪除或狀態非 1001 (CREATED)，將回傳 NotFound。
+         */
+        get: operations["getOrderDetails"];
+        /**
+         * 更新訂單內容
+         * @description 更新訂單內容。若訂單不存在、已軟刪除或狀態非 1001 (CREATED)，將拋出 NotFound。接著檢查重複商品（重複則拋出 BusinessException（INVALID_REQUEST）），並透過商品服務調整庫存（包含歸還舊品項庫存與扣除新品項庫存），最後更新訂單狀態與明細。
+         */
+        put: operations["updateOrder"];
+        post?: never;
+        /**
+         * 刪除訂單
+         * @description 刪除訂單。若訂單不存在、已軟刪除或狀態非 1001 (CREATED)，將拋出 NotFound。執行時會對訂單主檔與明細進行軟刪除，並透過商品服務歸還商品庫存。
+         */
+        delete: operations["deleteOrder"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 獲取帳戶詳細資訊
+         * @description 根據 ID 獲取帳戶詳細資訊。受限於 SQLRestriction 規則，若帳戶不存在、已軟刪除或狀態非啟用 'Y'，將拋出 NotFound。
+         */
+        get: operations["getAccountDetail"];
+        /**
+         * 更新帳戶
+         * @description 更新現有帳戶資訊。受限於 SQLRestriction 規則，若帳戶 ID 不存在、已軟刪除或狀態非啟用 'Y'，將拋出 NotFound。若欲將狀態從啟用 'Y' 變更為停用 'N'，會先檢查該帳戶是否仍有關聯訂單，若有則拋出 BusinessException（ACCOUNT_STILL_HAS_ORDER_CAN_NOT_BE_DELETED）。
+         */
+        put: operations["updateAccount"];
+        post?: never;
+        /**
+         * 刪除帳戶
+         * @description 執行帳戶軟刪除。受限於 SQLRestriction 規則，若帳戶 ID 不存在、已軟刪除或狀態非啟用 'Y'，將拋出 NotFound。若該帳戶仍有關聯訂單，則拋出 BusinessException（ACCOUNT_STILL_HAS_ORDER_CAN_NOT_BE_DELETED）。
+         */
+        delete: operations["deleteAccount"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/product": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 獲取商品列表（分頁）
+         * @description 獲取所有商品的分頁列表。受限於 SQLRestriction 規則，僅會回傳未被軟刪除且銷售狀態為 1001 (AVAILABLE) 的商品。
+         */
+        get: operations["getProductList"];
+        put?: never;
+        /**
+         * 新增商品
+         * @description 建立新商品。若已存在同名商品則拋出 BusinessException（PRODUCT_ALREADY_EXIST）。成功則新增商品資料，預設銷售狀態為 1001 (AVAILABLE)。
+         */
+        post: operations["createProduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/product/reserve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 預留商品庫存
+         * @description 內部使用：建立訂單時預留(reserve)商品庫存。
+         */
+        post: operations["reserveStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/product/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 釋放商品庫存
+         * @description 內部使用：刪除訂單時釋放(release)商品庫存。
+         */
+        post: operations["releaseStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/product/adjust-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 調整商品庫存
+         * @description 內部使用：更新訂單時依新舊項目差值調整(adjust)商品庫存的預留量。
+         */
+        post: operations["adjustStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 建立新訂單
+         * @description 建立新訂單。先驗證帳戶具下單資格（受 SQLRestriction 限制，停用或不存在的帳戶一律回傳 NotFound），檢查訂單內是否有重複商品（重複則拋出 BusinessException（INVALID_REQUEST）），最後透過商品服務預留庫存（商品不可銷售視為 NotFound、庫存不足則拋出 BusinessException（PRODUCT_STOCK_NOT_ENOUGH））。成功則新增訂單主檔（預設狀態 1001）與明細。
+         */
+        post: operations["createOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 獲取帳戶列表（分頁）
+         * @description 獲取所有帳戶的分頁列表。受限於 SQLRestriction 規則，僅會回傳未軟刪除且狀態為啟用 'Y' 的帳戶。
+         */
+        get: operations["getAccountList"];
+        put?: never;
+        /**
+         * 建立新帳戶
+         * @description 建立新帳戶。成功則新增帳戶資料，預設狀態為啟用 'Y'。
+         */
+        post: operations["createAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/product/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 批量獲取商品詳細資訊
+         * @description 根據多個 ID 獲取商品詳細資訊。受限於 SQLRestriction 規則，若商品不存在、已軟刪除或銷售狀態非 1001 (AVAILABLE)，該 ID 將被忽略。
+         */
+        get: operations["getProductBatch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/order/account/{accountId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 獲取帳戶訂單清單（分頁）
+         * @description 獲取該帳戶的所有有效訂單分頁清單。受限於SQLRestriction規則，僅會回傳未被軟刪除且狀態為 1001 (CREATED) 的訂單。
+         */
+        get: operations["getOrderList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/order/account/{accountId}/existence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 查詢帳戶是否仍有有效訂單
+         * @description 內部使用：判斷帳戶是否有關聯的有效訂單，用於帳戶更新與刪除時的檢核。受限於系統規則，僅會針對未軟刪除且狀態為 1001 (CREATED) 的訂單進行判定。true 與 false 都是查詢成功，故一律回 200 帶 body。
+         */
+        get: operations["getOrderExistence"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/{id}/order-eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 驗證帳戶下單資格
+         * @description 內部使用：驗證帳戶是否具下單資格。受限於 SQLRestriction 規則，停用或已軟刪除的帳戶查詢即不可見，故帳戶不存在、已軟刪除或狀態非啟用 'Y' 時一律回傳 NotFound。
+         */
+        get: operations["assertCanPlaceOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-	schemas: {
-		UpdateProductRequest: {
-			name?: string;
-			price: number;
-			/** Format: int32 */
-			saleStatus: number;
-			/** Format: int32 */
-			available: number;
-		};
-		UpdateOrderDetailRequest: {
-			/** Format: int32 */
-			productId: number;
-			/** Format: int32 */
-			quantity: number;
-		};
-		UpdateOrderRequest: {
-			/** Format: int32 */
-			orderId: number;
-			/** Format: int32 */
-			orderStatus: number;
-			items?: components['schemas']['UpdateOrderDetailRequest'][];
-		};
-		UpdateAccountRequest: {
-			name?: string;
-			status?: string;
-		};
-		CreateProductRequest: {
-			name?: string;
-			price: number;
-			/** Format: int32 */
-			available: number;
-		};
-		OrderItemRequest: {
-			/** Format: int32 */
-			productId?: number;
-			/** Format: int32 */
-			quantity?: number;
-		};
-		ProcessOrderItemsRequest: {
-			originalItems?: components['schemas']['OrderItemRequest'][];
-			updatedItems?: components['schemas']['OrderItemRequest'][];
-		};
-		CreateOrderDetailRequest: {
-			/** Format: int32 */
-			productId: number;
-			/** Format: int32 */
-			quantity: number;
-		};
-		CreateOrderRequest: {
-			/** Format: int32 */
-			accountId: number;
-			items?: components['schemas']['CreateOrderDetailRequest'][];
-		};
-		CreateAccountRequest: {
-			name?: string;
-		};
-		GetProductListResponse: {
-			/** Format: int32 */
-			id?: number;
-			name?: string;
-			price?: number;
-			/** Format: int32 */
-			saleStatus?: number;
-			/** Format: int32 */
-			available?: number;
-		};
-		GetProductDetailResponse: {
-			name?: string;
-			price?: number;
-			/** Format: int32 */
-			saleStatus?: number;
-			/** Format: int32 */
-			available?: number;
-		};
-		GetOrderDetailResponse: {
-			/** Format: int32 */
-			accountId?: number;
-			/** Format: int32 */
-			orderStatus?: number;
-			totalAmount?: number;
-			items?: components['schemas']['OrderItemDTO'][];
-		};
-		OrderItemDTO: {
-			/** Format: int32 */
-			productId?: number;
-			productName?: string;
-			/** Format: int32 */
-			quantity?: number;
-			productPrice?: number;
-		};
-		GetOrderListResponse: {
-			/** Format: int32 */
-			orderId?: number;
-			/** Format: int32 */
-			status?: number;
-			totalAmount?: number;
-		};
-		GetAccountListResponse: {
-			/** Format: int32 */
-			id?: number;
-			name?: string;
-			status?: string;
-		};
-		GetAccountDetailResponse: {
-			name?: string;
-			status?: string;
-		};
-	};
-	responses: never;
-	parameters: never;
-	requestBodies: never;
-	headers: never;
-	pathItems: never;
+    schemas: {
+        /** @description 更新商品請求 */
+        UpdateProductRequest: {
+            /**
+             * @description 商品名稱
+             * @example 商品A
+             */
+            name: string;
+            /**
+             * @description 商品價格
+             * @example 250
+             */
+            price: number;
+            /**
+             * Format: int32
+             * @description 銷售狀態 (1001=可銷售, 1002=不可銷售)
+             * @example 1001
+             */
+            saleStatus: number;
+            /**
+             * Format: int32
+             * @description 可用庫存數量
+             * @example 100
+             */
+            available: number;
+        };
+        /** @description 錯誤回應（RFC 9457 application/problem+json） */
+        ApiErrorResponse: {
+            /**
+             * @description 問題類型的穩定識別 URI，由 code 推導而來
+             * @example urn:problem:product-stock-not-enough
+             */
+            type?: string;
+            /**
+             * @description 這類問題的人類可讀摘要；同一個 code 永遠相同
+             * @example 商品庫存不足
+             */
+            title?: string;
+            /**
+             * Format: int32
+             * @description HTTP 狀態碼
+             * @example 400
+             */
+            status?: number;
+            /**
+             * @description 本次請求的具體說明
+             * @example 商品 5 庫存不足（需要 10、剩 3）
+             */
+            detail?: string;
+            /**
+             * @description 出錯的請求路徑
+             * @example /product/5/stock
+             */
+            instance?: string;
+            /**
+             * @description 機器可讀的穩定錯誤碼，呼叫端應以此分流
+             * @example PRODUCT_STOCK_NOT_ENOUGH
+             */
+            code?: string;
+            /** @description 逐筆的參數驗證失敗；僅 code = VALIDATION_FAILED 時出現，其餘錯誤此欄位缺席 */
+            errors?: components["schemas"]["ValidationError"][];
+        };
+        /** @description 單一筆參數驗證失敗 */
+        ValidationError: {
+            /**
+             * @description 未通過驗證的欄位名。class-level（跨欄位）約束沒有對應欄位，此時本欄位缺席
+             * @example accountId
+             */
+            field?: string;
+            /**
+             * @description 驗證失敗的原因
+             * @example must not be null
+             */
+            message?: string;
+        };
+        /** @description 更新訂單明細請求 */
+        UpdateOrderDetailRequest: {
+            /**
+             * Format: int32
+             * @description 商品 ID
+             * @example 1
+             */
+            productId: number;
+            /**
+             * Format: int32
+             * @description 購買數量
+             * @example 3
+             */
+            quantity: number;
+        };
+        /** @description 更新訂單請求 */
+        UpdateOrderRequest: {
+            /**
+             * Format: int32
+             * @description 訂單狀態 (1001=訂單建立, 1003=訂單取消)
+             * @example 1001
+             */
+            orderStatus: number;
+            /** @description 訂單明細項目列表 */
+            items: components["schemas"]["UpdateOrderDetailRequest"][];
+        };
+        /** @description 更新帳戶請求 */
+        UpdateAccountRequest: {
+            /**
+             * @description 帳戶名稱
+             * @example Bobby
+             */
+            name: string;
+            /**
+             * @description 啟用狀態 (Y=啟用, N=停用)
+             * @example Y
+             * @enum {string}
+             */
+            status: "Y" | "N";
+        };
+        /** @description 建立商品請求 */
+        CreateProductRequest: {
+            /**
+             * @description 商品名稱
+             * @example 商品A
+             */
+            name: string;
+            /**
+             * @description 商品價格
+             * @example 250
+             */
+            price: number;
+            /**
+             * Format: int32
+             * @description 可用庫存數量
+             * @example 100
+             */
+            available: number;
+        };
+        /** @description 資源建立成功回應 */
+        CreatedResponse: {
+            /**
+             * Format: int32
+             * @description 新建立資源的識別碼
+             * @example 1
+             */
+            id?: number;
+        };
+        /** @description 訂單項目請求（內部使用） */
+        OrderItemRequest: {
+            /**
+             * Format: int32
+             * @description 商品 ID
+             * @example 1
+             */
+            productId: number;
+            /**
+             * Format: int32
+             * @description 購買數量
+             * @example 2
+             */
+            quantity: number;
+        };
+        /** @description 庫存變動請求（內部使用）：預留或釋放指定項目的庫存 */
+        StockChangeRequest: {
+            /** @description 要變動庫存的訂單項目集合 */
+            items: components["schemas"]["OrderItemRequest"][];
+        };
+        /** @description 庫存調整請求（內部使用）：將庫存從 from 的預留狀態調整為 to 的預留狀態 */
+        AdjustStockRequest: {
+            /** @description 調整前的訂單項目集合（原預留） */
+            from: components["schemas"]["OrderItemRequest"][];
+            /** @description 調整後的訂單項目集合（新預留） */
+            to: components["schemas"]["OrderItemRequest"][];
+        };
+        /** @description 建立訂單明細請求 */
+        CreateOrderDetailRequest: {
+            /**
+             * Format: int32
+             * @description 商品 ID
+             * @example 1
+             */
+            productId: number;
+            /**
+             * Format: int32
+             * @description 購買數量
+             * @example 2
+             */
+            quantity: number;
+        };
+        /** @description 建立訂單請求 */
+        CreateOrderRequest: {
+            /**
+             * Format: int32
+             * @description 帳戶 ID
+             * @example 1
+             */
+            accountId: number;
+            /** @description 訂單明細項目列表 */
+            items: components["schemas"]["CreateOrderDetailRequest"][];
+        };
+        /** @description 建立帳戶請求 */
+        CreateAccountRequest: {
+            /**
+             * @description 帳戶名稱
+             * @example Bobby
+             */
+            name: string;
+        };
+        /** @description 商品列表回應 */
+        GetProductListResponse: {
+            /**
+             * Format: int32
+             * @description 商品 ID
+             * @example 1
+             */
+            id?: number;
+            /**
+             * @description 商品名稱
+             * @example 商品A
+             */
+            name?: string;
+            /**
+             * @description 商品價格
+             * @example 250
+             */
+            price?: number;
+            /**
+             * Format: int32
+             * @description 銷售狀態 (1001=可銷售, 1002=不可銷售)
+             * @example 1001
+             */
+            saleStatus?: number;
+            /**
+             * Format: int32
+             * @description 可用庫存數量
+             * @example 100
+             */
+            available?: number;
+        };
+        /** @description 分頁回應 */
+        PageResponseGetProductListResponse: {
+            /** @description 資料內容 */
+            content?: components["schemas"]["GetProductListResponse"][];
+            /**
+             * Format: int32
+             * @description 當前頁碼（從 0 開始）
+             * @example 0
+             */
+            page?: number;
+            /**
+             * Format: int32
+             * @description 每頁筆數
+             * @example 20
+             */
+            size?: number;
+            /**
+             * Format: int64
+             * @description 總筆數
+             * @example 100
+             */
+            totalElements?: number;
+            /**
+             * Format: int32
+             * @description 總頁數
+             * @example 5
+             */
+            totalPages?: number;
+        };
+        /** @description 商品詳細資訊回應 */
+        GetProductDetailResponse: {
+            /**
+             * Format: int32
+             * @description 商品 ID
+             * @example 1
+             */
+            id?: number;
+            /**
+             * @description 商品名稱
+             * @example 商品A
+             */
+            name?: string;
+            /**
+             * @description 商品價格
+             * @example 250
+             */
+            price?: number;
+            /**
+             * Format: int32
+             * @description 銷售狀態 (1001=可銷售, 1002=不可銷售)
+             * @example 1001
+             */
+            saleStatus?: number;
+            /**
+             * Format: int32
+             * @description 可用庫存數量
+             * @example 100
+             */
+            available?: number;
+        };
+        /** @description 訂單詳細資訊回應 */
+        GetOrderDetailResponse: {
+            /**
+             * Format: int32
+             * @description 帳戶 ID
+             * @example 1
+             */
+            accountId?: number;
+            /**
+             * Format: int32
+             * @description 訂單狀態 (1001=訂單建立, 1003=訂單取消)
+             * @example 1001
+             */
+            orderStatus?: number;
+            /**
+             * @description 訂單總金額
+             * @example 500
+             */
+            totalAmount?: number;
+            /** @description 訂單明細項目列表 */
+            items?: components["schemas"]["OrderItemDTO"][];
+        };
+        /** @description 訂單明細項目 */
+        OrderItemDTO: {
+            /**
+             * Format: int32
+             * @description 商品 ID
+             * @example 1
+             */
+            productId?: number;
+            /**
+             * @description 商品名稱
+             * @example 商品A
+             */
+            productName?: string;
+            /**
+             * Format: int32
+             * @description 購買數量
+             * @example 2
+             */
+            quantity?: number;
+            /**
+             * @description 商品單價
+             * @example 250
+             */
+            productPrice?: number;
+        };
+        /** @description 訂單列表回應 */
+        GetOrderListResponse: {
+            /**
+             * Format: int32
+             * @description 訂單 ID
+             * @example 1
+             */
+            orderId?: number;
+            /**
+             * Format: int32
+             * @description 訂單狀態 (1001=訂單建立, 1003=訂單取消)
+             * @example 1001
+             */
+            status?: number;
+            /**
+             * @description 訂單總金額
+             * @example 500
+             */
+            totalAmount?: number;
+        };
+        /** @description 分頁回應 */
+        PageResponseGetOrderListResponse: {
+            /** @description 資料內容 */
+            content?: components["schemas"]["GetOrderListResponse"][];
+            /**
+             * Format: int32
+             * @description 當前頁碼（從 0 開始）
+             * @example 0
+             */
+            page?: number;
+            /**
+             * Format: int32
+             * @description 每頁筆數
+             * @example 20
+             */
+            size?: number;
+            /**
+             * Format: int64
+             * @description 總筆數
+             * @example 100
+             */
+            totalElements?: number;
+            /**
+             * Format: int32
+             * @description 總頁數
+             * @example 5
+             */
+            totalPages?: number;
+        };
+        /** @description 帳戶訂單存在性查詢結果（內部使用） */
+        OrderExistenceResponse: {
+            /**
+             * @description 該帳戶是否仍有未軟刪除且狀態為 1001 (CREATED) 的訂單
+             * @example true
+             */
+            hasActiveOrder: boolean;
+        };
+        /** @description 帳戶列表回應 */
+        GetAccountListResponse: {
+            /**
+             * Format: int32
+             * @description 帳戶 ID
+             * @example 1
+             */
+            id?: number;
+            /**
+             * @description 帳戶名稱
+             * @example Bobby
+             */
+            name?: string;
+            /**
+             * @description 啟用狀態 (Y=啟用, N=停用)
+             * @example Y
+             * @enum {string}
+             */
+            status?: "Y" | "N";
+        };
+        /** @description 分頁回應 */
+        PageResponseGetAccountListResponse: {
+            /** @description 資料內容 */
+            content?: components["schemas"]["GetAccountListResponse"][];
+            /**
+             * Format: int32
+             * @description 當前頁碼（從 0 開始）
+             * @example 0
+             */
+            page?: number;
+            /**
+             * Format: int32
+             * @description 每頁筆數
+             * @example 20
+             */
+            size?: number;
+            /**
+             * Format: int64
+             * @description 總筆數
+             * @example 100
+             */
+            totalElements?: number;
+            /**
+             * Format: int32
+             * @description 總頁數
+             * @example 5
+             */
+            totalPages?: number;
+        };
+        /** @description 帳戶詳細資訊回應 */
+        GetAccountDetailResponse: {
+            /**
+             * @description 帳戶名稱
+             * @example Bobby
+             */
+            name?: string;
+            /**
+             * @description 啟用狀態 (Y=啟用, N=停用)
+             * @example Y
+             * @enum {string}
+             */
+            status?: "Y" | "N";
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-// 從 common-types.ts 匯入手動維護的型別
-export type { PageResponse, PaginationParams } from './common-types';
-
 export type $defs = Record<string, never>;
 export interface operations {
-	getProductDetail: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': components['schemas']['GetProductDetailResponse'];
-				};
-			};
-		};
-	};
-	updateProduct: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateProductRequest'];
-			};
-		};
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	deleteProduct: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	updateOrder: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateOrderRequest'];
-			};
-		};
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	createOrder: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['CreateOrderRequest'];
-			};
-		};
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': number;
-				};
-			};
-		};
-	};
-	getAccountDetail: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': components['schemas']['GetAccountDetailResponse'];
-				};
-			};
-		};
-	};
-	updateAccount: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateAccountRequest'];
-			};
-		};
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	deleteAccount: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	getProductList: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': components['schemas']['GetProductListResponse'][];
-				};
-			};
-		};
-	};
-	createProduct: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['CreateProductRequest'];
-			};
-		};
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': number;
-				};
-			};
-		};
-	};
-	processOrderItems: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ProcessOrderItemsRequest'];
-			};
-		};
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	getAccountList: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': components['schemas']['GetAccountListResponse'][];
-				};
-			};
-		};
-	};
-	createAccount: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['CreateAccountRequest'];
-			};
-		};
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': number;
-				};
-			};
-		};
-	};
-	createOrderPrecondition: {
-		parameters: {
-			query: {
-				count: number;
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': string;
-				};
-			};
-		};
-	};
-	getProductBatch: {
-		parameters: {
-			query: {
-				ids: number[];
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': components['schemas']['GetProductDetailResponse'][];
-				};
-			};
-		};
-	};
-	getOrderDetails: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				orderId: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': components['schemas']['GetOrderDetailResponse'];
-				};
-			};
-		};
-	};
-	deleteOrder: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				orderId: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	getOrderList: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				accountId: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': components['schemas']['GetOrderListResponse'][];
-				};
-			};
-		};
-	};
-	AccountIdIsInOrder: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				accountId: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'*/*': boolean;
-				};
-			};
-		};
-	};
+    getProductDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 商品 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 成功取得商品詳細資訊 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GetProductDetailResponse"];
+                };
+            };
+            /** @description 商品不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    updateProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 商品 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProductRequest"];
+            };
+        };
+        responses: {
+            /** @description 更新成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 參數驗證失敗或商品名稱已存在 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 商品不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 商品 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 刪除成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 商品不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getOrderDetails: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 訂單 ID
+                 * @example 1
+                 */
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 成功取得訂單詳細資訊 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GetOrderDetailResponse"];
+                };
+            };
+            /** @description 訂單不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    updateOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 訂單 ID
+                 * @example 1
+                 */
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description 更新成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 參數驗證失敗、重複商品或庫存不足 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 訂單不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 訂單 ID
+                 * @example 1
+                 */
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 刪除成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 訂單不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getAccountDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 帳戶 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 成功取得帳戶詳細資訊 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GetAccountDetailResponse"];
+                };
+            };
+            /** @description 帳戶不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    updateAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 帳戶 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description 更新成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 參數驗證失敗或帳戶仍有關聯訂單 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 帳戶不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 帳戶 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 刪除成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 帳戶仍有關聯訂單，無法刪除 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 帳戶不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getProductList: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 成功取得商品分頁列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseGetProductListResponse"];
+                };
+            };
+        };
+    };
+    createProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductRequest"];
+            };
+        };
+        responses: {
+            /** @description 建立成功，回傳商品 ID 與 Location 標頭 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CreatedResponse"];
+                };
+            };
+            /** @description 參數驗證失敗或商品名稱已存在 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    reserveStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description 預留成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 參數驗證失敗或庫存不足 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 商品不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    releaseStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description 釋放成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 參數驗證失敗 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 商品不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    adjustStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdjustStockRequest"];
+            };
+        };
+        responses: {
+            /** @description 調整成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 參數驗證失敗或庫存不足 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 商品不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    createOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description 建立成功，回傳訂單 ID 與 Location 標頭 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CreatedResponse"];
+                };
+            };
+            /** @description 參數驗證失敗、重複商品或庫存不足 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description 帳戶不具下單資格或商品不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getAccountList: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 成功取得帳戶分頁列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseGetAccountListResponse"];
+                };
+            };
+        };
+    };
+    createAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description 建立成功，回傳帳戶 ID 與 Location 標頭 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CreatedResponse"];
+                };
+            };
+            /** @description 參數驗證失敗 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getProductBatch: {
+        parameters: {
+            query: {
+                /**
+                 * @description 商品 ID 集合（逗號分隔）
+                 * @example 1,2,3
+                 */
+                ids: number[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 成功取得商品詳細資訊列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GetProductDetailResponse"][];
+                };
+            };
+        };
+    };
+    getOrderList: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description 帳戶 ID
+                 * @example 1
+                 */
+                accountId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 成功取得訂單分頁列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseGetOrderListResponse"];
+                };
+            };
+        };
+    };
+    getOrderExistence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 帳戶 ID
+                 * @example 1
+                 */
+                accountId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 查詢成功；hasActiveOrder 為 true 表示仍有關聯訂單 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrderExistenceResponse"];
+                };
+            };
+        };
+    };
+    assertCanPlaceOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 帳戶 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 帳戶具下單資格 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 帳戶不存在或不可下單 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
 }

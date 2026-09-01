@@ -1,6 +1,6 @@
 // tests/api/springboot/product.spec.ts
 
-import { expectError, expectOk } from '@apis/base-api-client';
+import { expectCreated, expectError, expectOk } from '@apis/base-api-client';
 import { test } from '@fixtures/springboot-chained.fixture';
 import { expect } from '@playwright/test';
 import { ProductSaleStatus } from '@schema/constants';
@@ -8,7 +8,7 @@ import { ProductSaleStatus } from '@schema/constants';
 test.describe('Product 商品管理', () => {
 	test('應該能建立新商品', async ({ springbootApi, newProductData }) => {
 		const response = await springbootApi.createProduct(newProductData);
-		const productId = expectOk(response);
+		const productId = expectCreated(response, '/product');
 
 		expect(typeof productId).toBe('number');
 		expect(productId).toBeGreaterThan(0);
@@ -90,8 +90,8 @@ test.describe('Product 商品管理', () => {
 			available: 50,
 		});
 
-		const errorBody = expectError(response, 400);
-		expect(errorBody.message).toContain('already exists');
+		const errorBody = expectError(response, 400, 'PRODUCT_ALREADY_EXIST');
+		expect(errorBody.detail).toContain('already exists');
 	});
 
 	test('當商品名稱重複時，無法更新', async ({
@@ -112,7 +112,7 @@ test.describe('Product 商品管理', () => {
 			available: updateProductData.available,
 		});
 
-		const errorBody = expectError(response, 400);
-		expect(errorBody.message).toContain('already exists');
+		const errorBody = expectError(response, 400, 'PRODUCT_ALREADY_EXIST');
+		expect(errorBody.detail).toContain('already exists');
 	});
 });

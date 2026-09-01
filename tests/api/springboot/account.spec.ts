@@ -1,6 +1,6 @@
 // tests/api/springboot/account.spec.ts
 
-import { expectError, expectOk } from '@apis/base-api-client';
+import { expectCreated, expectError, expectOk } from '@apis/base-api-client';
 import { test } from '@fixtures/springboot-chained.fixture';
 import { expect } from '@playwright/test';
 import { AccountStatus } from '@schema/constants';
@@ -8,7 +8,7 @@ import { AccountStatus } from '@schema/constants';
 test.describe('Account 帳戶管理', () => {
 	test('應該能建立新帳戶', async ({ springbootApi, newAccountData }) => {
 		const response = await springbootApi.createAccount(newAccountData);
-		const accountId = expectOk(response);
+		const accountId = expectCreated(response, '/account');
 
 		expect(typeof accountId).toBe('number');
 		expect(accountId).toBeGreaterThan(0);
@@ -85,9 +85,9 @@ test.describe('Account 帳戶管理', () => {
 
 	test('當帳戶有關聯訂單時，無法刪除', async ({ springbootApi, existingAccountWithOrders }) => {
 		const response = await springbootApi.deleteAccount(existingAccountWithOrders.id);
-		const errorBody = expectError(response, 400);
+		const errorBody = expectError(response, 400, 'ACCOUNT_STILL_HAS_ORDER_CAN_NOT_BE_DELETED');
 
-		expect(errorBody.message).toContain('has associated orders');
+		expect(errorBody.detail).toContain('has associated orders');
 	});
 
 	test('當帳戶有關聯訂單時，無法將狀態改為停用', async ({
@@ -100,7 +100,7 @@ test.describe('Account 帳戶管理', () => {
 			status: AccountStatus.Inactive,
 		});
 
-		const errorBody = expectError(response, 400);
-		expect(errorBody.message).toContain('has associated orders');
+		const errorBody = expectError(response, 400, 'ACCOUNT_STILL_HAS_ORDER_CAN_NOT_BE_DELETED');
+		expect(errorBody.detail).toContain('has associated orders');
 	});
 });

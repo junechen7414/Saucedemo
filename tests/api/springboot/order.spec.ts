@@ -1,6 +1,6 @@
 // tests/api/springboot/order.spec.ts
 
-import { expectError, expectOk } from '@apis/base-api-client';
+import { expectCreated, expectError, expectOk } from '@apis/base-api-client';
 import { test } from '@fixtures/springboot-chained.fixture';
 import { expect } from '@playwright/test';
 import { AccountStatus, ProductSaleStatus } from '@schema/constants';
@@ -15,7 +15,7 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 		const response = await springbootApi.createOrder(
 			newOrderData(existingAccount.id, existingProduct.id),
 		);
-		const orderId = expectOk(response);
+		const orderId = expectCreated(response, '/order');
 
 		expect(typeof orderId).toBe('number');
 	});
@@ -38,8 +38,8 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 			newOrderData(existingAccount.id, existingProduct.id),
 		);
 
-		const errorBody = expectError(response, 404);
-		expect(errorBody.message).toBe(`Account not found with id: ${existingAccount.id}`);
+		const errorBody = expectError(response, 404, 'RESOURCE_NOT_FOUND');
+		expect(errorBody.detail).toBe(`Account not found with id: ${existingAccount.id}`);
 	});
 
 	test('當商品狀態為無效時，無法建立新訂單', async ({
@@ -60,8 +60,8 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 			newOrderData(existingAccount.id, existingProduct.id),
 		);
 
-		const errorBody = expectError(response, 404);
-		expect(errorBody.message).toBe(`Products not found with IDs: ${existingProduct.id}`);
+		const errorBody = expectError(response, 404, 'RESOURCE_NOT_FOUND');
+		expect(errorBody.detail).toBe(`Products not found with IDs: ${existingProduct.id}`);
 	});
 
 	test('應該能更新訂單明細數量與狀態', async ({
@@ -71,7 +71,8 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 		updateOrderData,
 	}) => {
 		const response = await springbootApi.updateOrder(
-			updateOrderData(existingOrder.id, existingProduct.id),
+			existingOrder.id,
+			updateOrderData(existingProduct.id),
 		);
 		expectOk(response);
 	});
@@ -131,8 +132,12 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 			items: [{ productId: existingProduct.id, quantity: existingProduct.available + 1 }],
 		});
 
+		// 上游跨 client 邊界時原始錯誤碼會被壓成 INVALID_REQUEST（detail 仍保有庫存語意）。
+		// 上游修好傳遞後這裡會變成 PRODUCT_STOCK_NOT_ENOUGH，過渡期兩者皆接受；
+		// TODO: 上游 RestClientErrorHandler 的修正合併後，收斂成單一穩定碼。
 		const errorBody = expectError(response, 400);
-		expect(errorBody.message).toBe(`商品 ID ${existingProduct.id} 庫存不足，無法預留`);
+		expect(['INVALID_REQUEST', 'PRODUCT_STOCK_NOT_ENOUGH']).toContain(errorBody.code);
+		expect(errorBody.detail).toBe(`商品 ID ${existingProduct.id} 庫存不足，無法預留`);
 	});
 
 	test('當商品庫存不足時，無法更新訂單', async ({
@@ -147,8 +152,8 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 		const originalQuantity = originalItem?.quantity ?? 0;
 
 		// 嘗試將訂單更新為數量大於 (目前可用庫存 + 原訂單數量)
-		const response = await springbootApi.updateOrder({
-			...updateOrderData(existingOrder.id, existingProduct.id),
+		const response = await springbootApi.updateOrder(existingOrder.id, {
+			...updateOrderData(existingProduct.id),
 			items: [
 				{
 					productId: existingProduct.id,
@@ -157,7 +162,11 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 			],
 		});
 
+		// 上游跨 client 邊界時原始錯誤碼會被壓成 INVALID_REQUEST（detail 仍保有庫存語意）。
+		// 上游修好傳遞後這裡會變成 PRODUCT_STOCK_NOT_ENOUGH，過渡期兩者皆接受；
+		// TODO: 上游 RestClientErrorHandler 的修正合併後，收斂成單一穩定碼。
 		const errorBody = expectError(response, 400);
-		expect(errorBody.message).toBe(`商品 ID ${existingProduct.id} 庫存不足，無法預留`);
+		expect(['INVALID_REQUEST', 'PRODUCT_STOCK_NOT_ENOUGH']).toContain(errorBody.code);
+		expect(errorBody.detail).toBe(`商品 ID ${existingProduct.id} 庫存不足，無法預留`);
 	});
 });

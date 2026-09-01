@@ -12,10 +12,7 @@ type SpringbootDataFixtures = {
 		accountId: number,
 		productId: number,
 	) => components['schemas']['CreateOrderRequest'];
-	updateOrderData: (
-		orderId: number,
-		productId: number,
-	) => components['schemas']['UpdateOrderRequest'];
+	updateOrderData: (productId: number) => components['schemas']['UpdateOrderRequest'];
 };
 
 export const springbootTestData = baseTest.extend<SpringbootDataFixtures>({
@@ -59,10 +56,9 @@ export const springbootTestData = baseTest.extend<SpringbootDataFixtures>({
 		}));
 	},
 
-	// 更新訂單的資料
+	// 更新訂單的資料 (訂單 ID 走 URL 路徑，不再放在 body)
 	updateOrderData: async ({}, use) => {
-		await use((orderId, productId) => ({
-			orderId: orderId,
+		await use((productId) => ({
 			orderStatus: OrderStatus.Pending,
 			items: [{ productId: productId, quantity: 1 }],
 		}));
