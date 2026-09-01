@@ -132,11 +132,7 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 			items: [{ productId: existingProduct.id, quantity: existingProduct.available + 1 }],
 		});
 
-		// 上游跨 client 邊界時原始錯誤碼會被壓成 INVALID_REQUEST（detail 仍保有庫存語意）。
-		// 上游修好傳遞後這裡會變成 PRODUCT_STOCK_NOT_ENOUGH，過渡期兩者皆接受；
-		// TODO: 上游 RestClientErrorHandler 的修正合併後，收斂成單一穩定碼。
-		const errorBody = expectError(response, 400);
-		expect(['INVALID_REQUEST', 'PRODUCT_STOCK_NOT_ENOUGH']).toContain(errorBody.code);
+		const errorBody = expectError(response, 400, 'PRODUCT_STOCK_NOT_ENOUGH');
 		expect(errorBody.detail).toBe(`商品 ID ${existingProduct.id} 庫存不足，無法預留`);
 	});
 
@@ -162,11 +158,7 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 			],
 		});
 
-		// 上游跨 client 邊界時原始錯誤碼會被壓成 INVALID_REQUEST（detail 仍保有庫存語意）。
-		// 上游修好傳遞後這裡會變成 PRODUCT_STOCK_NOT_ENOUGH，過渡期兩者皆接受；
-		// TODO: 上游 RestClientErrorHandler 的修正合併後，收斂成單一穩定碼。
-		const errorBody = expectError(response, 400);
-		expect(['INVALID_REQUEST', 'PRODUCT_STOCK_NOT_ENOUGH']).toContain(errorBody.code);
+		const errorBody = expectError(response, 400, 'PRODUCT_STOCK_NOT_ENOUGH');
 		expect(errorBody.detail).toBe(`商品 ID ${existingProduct.id} 庫存不足，無法預留`);
 	});
 });
