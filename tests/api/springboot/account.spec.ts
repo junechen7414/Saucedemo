@@ -103,4 +103,49 @@ test.describe('Account 帳戶管理', () => {
 		const errorBody = expectError(response, 400, 'ACCOUNT_STILL_HAS_ORDER_CAN_NOT_BE_DELETED');
 		expect(errorBody.detail).toContain('has associated orders');
 	});
+
+	test('啟用中的帳戶應具下單資格', async ({ springbootApi, existingAccount }) => {
+		const response = await springbootApi.getAccountOrderEligibility(existingAccount.id);
+		expectOk(response);
+
+		// 具資格是以 204 表達，沒有 body
+		expect(response.status).toBe(204);
+	});
+
+	test('已有關聯訂單的啟用帳戶仍具下單資格', async ({
+		springbootApi,
+		existingAccountWithOrders,
+	}) => {
+		const response = await springbootApi.getAccountOrderEligibility(existingAccountWithOrders.id);
+		expectOk(response);
+
+		expect(response.status).toBe(204);
+	});
+
+	test('當帳戶已被刪除時，不具下單資格', async ({ springbootApi, existingAccount }) => {
+		const deleteResponse = await springbootApi.deleteAccount(existingAccount.id);
+		expectOk(deleteResponse);
+
+		// 已軟刪除的帳戶查詢即不可見，故回 404 而非 400
+		const response = await springbootApi.getAccountOrderEligibility(existingAccount.id);
+		const errorBody = expectError(response, 404, 'RESOURCE_NOT_FOUND');
+		expect(errorBody.detail).toBe(`Account not found with id: ${existingAccount.id}`);
+	});
+
+	test('當帳戶狀態為停用時，不具下單資格', async ({
+		springbootApi,
+		existingAccount,
+		updateAccountData,
+	}) => {
+		const updateResponse = await springbootApi.updateAccount(existingAccount.id, {
+			...updateAccountData,
+			status: AccountStatus.Inactive,
+		});
+		expectOk(updateResponse);
+
+		// 停用帳戶同樣因 SQLRestriction 而不可見，回 404
+		const response = await springbootApi.getAccountOrderEligibility(existingAccount.id);
+		const errorBody = expectError(response, 404, 'RESOURCE_NOT_FOUND');
+		expect(errorBody.detail).toBe(`Account not found with id: ${existingAccount.id}`);
+	});
 });

@@ -65,6 +65,13 @@ export class SpringbootApiClient {
 	}
 
 	/**
+	 * 驗證帳戶下單資格：具資格回 204，帳戶不存在／已軟刪除／狀態非啟用皆回 404
+	 */
+	getAccountOrderEligibility(id: number): Promise<ApiResult<void>> {
+		return this.requester.get<void>(`${this.endpoints.account}/${id}/order-eligibility`);
+	}
+
+	/**
 	 * Product 相關操作
 	 */
 	createProduct(payload: Schemas['CreateProductRequest']): Promise<ApiResult<CreatedResponse>> {
@@ -130,6 +137,15 @@ export class SpringbootApiClient {
 
 	deleteOrder(id: number): Promise<ApiResult<void>> {
 		return this.requester.delete<void>(`${this.endpoints.order}/${id}`);
+	}
+
+	/**
+	 * 查詢帳戶是否仍有有效訂單 (未軟刪除且狀態為 1001)；true / false 皆為查詢成功，一律回 200
+	 */
+	getOrderExistence(accountId: number): Promise<ApiResult<Schemas['OrderExistenceResponse']>> {
+		return this.requester.get<Schemas['OrderExistenceResponse']>(
+			`${this.endpoints.order}/account/${accountId}/existence`,
+		);
 	}
 
 	/**

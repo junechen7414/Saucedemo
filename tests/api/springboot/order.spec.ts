@@ -3,7 +3,7 @@
 import { expectCreated, expectError, expectOk } from '@apis/base-api-client';
 import { test } from '@fixtures/springboot-chained.fixture';
 import { expect } from '@playwright/test';
-import { AccountStatus, ProductSaleStatus } from '@schema/constants';
+import { AccountStatus, OrderStatus, ProductSaleStatus } from '@schema/constants';
 
 test.describe('Order 訂單管理 (含明細更新)', () => {
 	test('應該能建立新訂單', async ({
@@ -160,5 +160,66 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 
 		const errorBody = expectError(response, 400, 'PRODUCT_STOCK_NOT_ENOUGH');
 		expect(errorBody.detail).toBe(`商品 ID ${existingProduct.id} 庫存不足，無法預留`);
+	});
+
+	test('當帳戶沒有任何訂單時，應回報沒有有效訂單', async ({ springbootApi, existingAccount }) => {
+		const response = await springbootApi.getOrderExistence(existingAccount.id);
+		const existence = expectOk(response);
+
+		expect(existence.hasActiveOrder).toBe(false);
+	});
+
+	test('當帳戶有狀態為 1001 的訂單時，應回報仍有有效訂單', async ({
+		springbootApi,
+		existingOrder,
+	}) => {
+		const response = await springbootApi.getOrderExistence(existingOrder.accountId);
+		const existence = expectOk(response);
+
+		expect(existence.hasActiveOrder).toBe(true);
+	});
+
+	test('當訂單狀態不再是 1001 時，應回報沒有有效訂單', async ({
+		springbootApi,
+		existingOrder,
+		existingProduct,
+		updateOrderData,
+	}) => {
+		// 僅有狀態 1001 才算有效訂單，這裡改成任一非 1001 的狀態
+		const updateResponse = await springbootApi.updateOrder(existingOrder.id, {
+			...updateOrderData(existingProduct.id),
+			orderStatus: OrderStatus.Completed,
+		});
+		expectOk(updateResponse);
+
+		const response = await springbootApi.getOrderExistence(existingOrder.accountId);
+		const existence = expectOk(response);
+
+		expect(existence.hasActiveOrder).toBe(false);
+	});
+
+	test('當訂單被刪除後，應回報沒有有效訂單', async ({ springbootApi, existingOrder }) => {
+		const deleteResponse = await springbootApi.deleteOrder(existingOrder.id);
+		expectOk(deleteResponse);
+
+		const response = await springbootApi.getOrderExistence(existingOrder.accountId);
+		const existence = expectOk(response);
+
+		expect(existence.hasActiveOrder).toBe(false);
+	});
+
+	test('當帳戶已不存在時，仍以 200 回報沒有有效訂單', async ({
+		springbootApi,
+		existingAccount,
+	}) => {
+		const deleteResponse = await springbootApi.deleteAccount(existingAccount.id);
+		expectOk(deleteResponse);
+
+		// 查不到帳戶不算錯誤，一律 200 帶 body
+		const response = await springbootApi.getOrderExistence(existingAccount.id);
+		expect(response.status).toBe(200);
+		const existence = expectOk(response);
+
+		expect(existence.hasActiveOrder).toBe(false);
 	});
 });
