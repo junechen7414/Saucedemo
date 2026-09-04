@@ -14,16 +14,24 @@ on:
   pull_request:
     types: [labeled, synchronize]
     branches: [main]
+  # 支援本 Repo push main 觸發 (trunk-based 下小改直接進 main，
+  # 不開 PR 就沒有貼標籤的機會，push 是這些 commit 唯一會跑到的 CI)。
+  # 後端 image 固定對接 latest —— 見下方 Set Image Tag。
+  push:
+    branches: [main]
 
 jobs:
   e2e-test:
-    # 只有以下三種情況會執行：
+    # 只有以下四種情況會執行：
     # 1. 後端發送訊號 (repository_dispatch)
     # 2. 手動觸發 (workflow_dispatch)
-    # 3. 本 PR 被貼上 'e2e-test' 標籤
+    # 3. 本 Repo push 到 main
+    # 4. 本 PR 被貼上 'e2e-test' 標籤
+    #    (PR 沒貼標籤就不跑，避免每次 push 分支都拉一次 Oracle)
     if: |
       github.event_name == 'repository_dispatch' ||
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
       (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e-test'))
     timeout-minutes: 60
     runs-on: ubuntu-latest
@@ -41,7 +49,7 @@ jobs:
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             TAG="${{ inputs.image_tag }}"
           else
-            # 本 Repo 的 PR 測試，預設對接後端的 latest 或 main 環境
+            # 本 Repo 自己的變更 (push main / PR 貼標籤)，對接後端的 latest
             TAG="latest"
           fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_OUTPUT
@@ -137,7 +145,8 @@ jobs:
                 echo "**上游是從 PR（而非 push \`main\`）觸發的。** 上游的 \`generate-docs\` 只在 push \`main\` 時執行，"
                 echo "因此這個 image 的 spec 不會有對應快照，差異會一直存在到該 PR 合併為止 —— 正常現象。"
               else
-                echo "**手動或本 repo PR 觸發。** 快照對應上游最新 \`main\`，被測 image 由 image tag 指定，"
+                echo "**手動、本 repo push \`main\`、或本 repo PR 貼標籤觸發。** 快照對應上游最新 \`main\`，"
+                echo "被測 image 由 image tag 指定 (push \`main\` 固定為 \`latest\`)，"
                 echo "兩者沒有版本關聯，差異僅供參考。"
               fi
               echo ""

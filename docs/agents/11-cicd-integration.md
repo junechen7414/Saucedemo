@@ -16,16 +16,36 @@
 
 #### 觸發條件
 
+兩支 workflow 的觸發條件不同，因為 API 測試綁著上游後端 image、成本也高得多。
+
+`demo.yml`（Saucedemo UI，`ui-staging`）—— 沒有外部依賴，能跑就跑：
+
 ```yaml
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  workflow_dispatch:  # 手動觸發
-  repository_dispatch:  # 後端專案觸發
-    types: [trigger-e2e-tests]
+  workflow_dispatch:
 ```
+
+`springboot.yml`（Spring Boot API，`springboot-api`）—— 每次執行都要拉起 Oracle，因此對
+PR 額外加了標籤把關：
+
+```yaml
+on:
+  workflow_dispatch:      # 手動指定 image_tag (最後的保險)
+  repository_dispatch:    # 上游 SpringBoot repo 推新 image 時連動
+    types: [backend_image_updated]
+  pull_request:           # 需再貼上 'e2e-test' 標籤才會真的跑 (見 job 的 if:)
+    types: [labeled, synchronize]
+    branches: [main]
+  push:                   # trunk-based 下直接進 main 的小改，唯一的 CI 把關
+    branches: [main]
+```
+
+被測 image 的 tag 由觸發來源決定：`repository_dispatch` 取 payload 的 `image_tag`、
+`workflow_dispatch` 取輸入值，`push` / `pull_request` 則固定對接 `latest`。
 
 #### 環境變數管理
 
