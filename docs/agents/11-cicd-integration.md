@@ -44,6 +44,12 @@ on:
     branches: [main]
 ```
 
+job 層的閘門對 `labeled` 事件只認「**這次加的**標籤是不是 `e2e-test`」（比對
+`github.event.label.name`），而不是問「這個 PR 現在有沒有 `e2e-test`」。因為一次貼多個
+標籤時，GitHub 會為每個標籤各發一次 `labeled` 事件，而每次事件的 payload 都已含完整標籤
+集合 —— 用 `contains()` 判斷會讓每次事件都成立，貼 N 個標籤就重複拉 N 次 Oracle。
+`synchronize` 事件的 payload 沒有 `github.event.label`，那一路仍用 `contains()` 判斷標籤存在。
+
 被測 image 的 tag 由觸發來源決定：`repository_dispatch` 取 payload 的 `image_tag`、
 `workflow_dispatch` 取輸入值，`push` / `pull_request` 則固定對接 `latest`。
 

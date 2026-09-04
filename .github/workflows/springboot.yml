@@ -26,13 +26,20 @@ jobs:
     # 1. 後端發送訊號 (repository_dispatch)
     # 2. 手動觸發 (workflow_dispatch)
     # 3. 本 Repo push 到 main
-    # 4. 本 PR 被貼上 'e2e-test' 標籤
+    # 4. 本 PR 被貼上 'e2e-test' 標籤，或已貼標籤的 PR 又推了新 commit
     #    (PR 沒貼標籤就不跑，避免每次 push 分支都拉一次 Oracle)
+    # labeled 事件刻意比對 github.event.label.name (這次加的那個標籤)，而不是用
+    # contains() 去問「PR 現在有沒有 e2e-test」—— 後者在一次貼多個標籤時，每個標籤
+    # 各發一次 labeled 事件、每次的 payload 都已含 e2e-test，會重複跑好幾輪 Oracle。
+    # synchronize 事件的 payload 沒有 github.event.label，仍須用 contains() 判斷標籤存在。
     if: |
       github.event_name == 'repository_dispatch' ||
       github.event_name == 'workflow_dispatch' ||
       github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e-test'))
+      (github.event_name == 'pull_request' && (
+        (github.event.action == 'labeled' && github.event.label.name == 'e2e-test') ||
+        (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'e2e-test'))
+      ))
     timeout-minutes: 60
     runs-on: ubuntu-latest
     
