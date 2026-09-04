@@ -1,6 +1,9 @@
 name: Saucedemo UI Tests
 
 on:
+  # trunk-based 下小改直接推 main
+  push:
+    branches: [main, master]
   pull_request:
     branches: [main, master]
   workflow_dispatch:

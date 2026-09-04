@@ -28,7 +28,7 @@ pnpm run api-spec:update
 時錯配更明顯——檔案永遠是 main 最新的，image 卻是舊的。
 
 規格的正確來源是**被測的那個 artifact 自己**：image 吐出來的 `/v3/api-docs` 定義上就同步，
-三種觸發路徑（`repository_dispatch` / `workflow_dispatch` / PR 貼標籤）一次全對。`docs/swagger.json`
+四種觸發路徑（`repository_dispatch` / `workflow_dispatch` / 本 repo push `main` / PR 貼標籤）一次全對。`docs/swagger.json`
 則保留為 API 變更的可讀記錄（在本 repo 看得到後端何時改了什麼），CI 會比對兩者並在
 job summary 提示落差，但不阻擋測試。
 
@@ -44,13 +44,13 @@ job summary 提示落差，但不阻擋測試。
 | 11:53:39 | 上游 `generate-docs` 才把新的 `docs/swagger.json` 推進本 repo（**慢 63 秒**） |
 
 成因在上游 `image-publish.yml` 的 job 依賴：dispatch 是 `build-and-push` 的**最後一步**，而同步
-快照的 `generate-docs` 是 `needs: build-and-push` —— 順序上永遠追不上。因此三種觸發各有各的讀法：
+快照的 `generate-docs` 是 `needs: build-and-push` —— 順序上永遠追不上。因此四種觸發各有各的讀法：
 
 | 觸發 | 差異的意義 | 該做什麼 |
 |---|---|---|
 | 上游 push `main`（`repository_dispatch`，payload `event_name=push`） | 這次 push 改了 API 契約，差異即變更內容；快照晚約 60 秒補上 | 什麼都不用做，下次自動觸發會是 ✅ |
 | 上游 PR 貼標籤（`repository_dispatch`，payload 非 `push`） | 上游 `generate-docs` 只在 push `main` 跑，這個 image **永遠不會**有對應快照 | 什麼都不用做，差異到該 PR 合併才消失 |
-| `workflow_dispatch` / 本 repo PR 貼標籤 | 快照對應上游最新 `main`，image 由 tag 指定，兩者無版本關聯 | 差異僅供參考 |
+| `workflow_dispatch` / 本 repo push `main` / 本 repo PR 貼標籤 | 快照對應上游最新 `main`，image 由 tag 指定（push `main` 固定為 `latest`），兩者無版本關聯 | 差異僅供參考 |
 
 **唯一該追的異常**：連續多次「上游 push `main`」觸發都出現**相同**差異 —— 那代表上游
 `generate-docs` job 沒把快照推過來（例如 token 過期、job 失敗），去查上游 run。
