@@ -1037,6 +1037,10 @@
             "type": "integer",
             "format": "int32",
             "description": "銷售狀態 (1001\u003d可銷售, 1002\u003d不可銷售)",
+            "enum": [
+              1001,
+              1002
+            ],
             "example": 1001
           },
           "available": {
@@ -1154,6 +1158,10 @@
             "type": "integer",
             "format": "int32",
             "description": "訂單狀態 (1001\u003d訂單建立, 1003\u003d訂單取消)",
+            "enum": [
+              1001,
+              1003
+            ],
             "example": 1001
           },
           "items": {
@@ -1188,9 +1196,7 @@
               "Y",
               "N"
             ],
-            "example": "Y",
-            "minLength": 1,
-            "pattern": "^[YN]$"
+            "example": "Y"
           }
         },
         "required": [
@@ -1391,6 +1397,10 @@
             "type": "integer",
             "format": "int32",
             "description": "銷售狀態 (1001\u003d可銷售, 1002\u003d不可銷售)",
+            "enum": [
+              1001,
+              1002
+            ],
             "example": 1001
           },
           "available": {
@@ -1462,6 +1472,10 @@
             "type": "integer",
             "format": "int32",
             "description": "銷售狀態 (1001\u003d可銷售, 1002\u003d不可銷售)",
+            "enum": [
+              1001,
+              1002
+            ],
             "example": 1001
           },
           "available": {
@@ -1486,6 +1500,10 @@
             "type": "integer",
             "format": "int32",
             "description": "訂單狀態 (1001\u003d訂單建立, 1003\u003d訂單取消)",
+            "enum": [
+              1001,
+              1003
+            ],
             "example": 1001
           },
           "totalAmount": {
@@ -1544,6 +1562,10 @@
             "type": "integer",
             "format": "int32",
             "description": "訂單狀態 (1001\u003d訂單建立, 1003\u003d訂單取消)",
+            "enum": [
+              1001,
+              1003
+            ],
             "example": 1001
           },
           "totalAmount": {
