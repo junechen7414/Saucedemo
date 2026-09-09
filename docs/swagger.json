@@ -1085,7 +1085,7 @@
           },
           "code": {
             "type": "string",
-            "description": "機器可讀的穩定錯誤碼，呼叫端應以此分流",
+            "description": "機器可讀的穩定錯誤碼，呼叫端應以此分流。值為 ErrorCode 的常數名；框架攔下的協定層錯誤（405、415…）則為對應的 HTTP 狀態名（METHOD_NOT_ALLOWED…）",
             "example": "PRODUCT_STOCK_NOT_ENOUGH"
           },
           "errors": {
@@ -1095,7 +1095,15 @@
               "$ref": "#/components/schemas/ValidationError"
             }
           }
-        }
+        },
+        "required": [
+          "code",
+          "detail",
+          "instance",
+          "status",
+          "title",
+          "type"
+        ]
       },
       "ValidationError": {
         "type": "object",
@@ -1111,7 +1119,10 @@
             "description": "驗證失敗的原因",
             "example": "must not be null"
           }
-        }
+        },
+        "required": [
+          "message"
+        ]
       },
       "UpdateOrderDetailRequest": {
         "type": "object",
