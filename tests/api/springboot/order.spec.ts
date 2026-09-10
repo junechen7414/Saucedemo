@@ -185,10 +185,11 @@ test.describe('Order 訂單管理 (含明細更新)', () => {
 		existingProduct,
 		updateOrderData,
 	}) => {
-		// 僅有狀態 1001 才算有效訂單，這裡改成任一非 1001 的狀態
+		// 僅有狀態 1001 才算有效訂單，這裡改成 1003（已取消）——
+		// 後端 OrderStatus 唯一的非 1001 狀態
 		const updateResponse = await springbootApi.updateOrder(existingOrder.id, {
 			...updateOrderData(existingProduct.id),
-			orderStatus: OrderStatus.Completed,
+			orderStatus: OrderStatus.Cancelled,
 		});
 		expectOk(updateResponse);
 
