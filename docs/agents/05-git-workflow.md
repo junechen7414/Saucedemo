@@ -188,6 +188,25 @@ PR 在 GitHub API 中本質上也是 issue，但各工具加 label 的方式不�
 
 - **BOB `/create-pr`**：目前**尚未支援自動加 label**，建立後請用上面的 `gh`/MCP 方式或 GitHub 網頁（PR 頁面右側 Labels 區塊）補上。
 
+## 合併方式：一律用 rebase
+
+**本 repo 與上游 `SpringBoot` 統一用 rebase merge**，GitHub 設定只開「Allow rebase merging」（Settings → General → Pull Requests）。
+
+本 repo 過去用 squash（歷史上 commit 標題的 `(#NN)` 後綴就是那時留下的），上游則用 merge commit —— 兩邊不一致，換 repo 就得換規則。現在統一成 rebase：
+
+- 相對 **merge commit**：不會多出 `Merge pull request #NN from …` 這種除了 PR 編號以外零資訊量的 subject，`main` 保持線性。
+- 相對 **squash**：不會把 PR 內多個各自有意義、各自可 revert 的 commit 壓成一顆。
+
+代價只有 commit SHA 會被改寫，而分支合併後即刪，實務上無感。
+
+用 GitHub MCP 合併時明確指定方式，不要依賴 repo 預設：
+
+```
+merge_pull_request(pullNumber: <PR 號>, merge_method: "rebase", expectedHeadSha: "<分支 HEAD 全長 SHA>")
+```
+
+> `expectedHeadSha` 建議帶上：從檢查完 PR 到實際合併之間若有人再推 commit，帶了它會直接失敗，而不是靜默合併掉沒看過的內容。
+
 ## 分支清理
 
 ### 合併後的清理流程

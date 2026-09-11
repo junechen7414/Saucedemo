@@ -87,4 +87,4 @@ HTML 報告在本機輸出至 `playwright-report/<PW_DATE>`（加時間戳），
 
 ## Git 工作流程
 
-Trunk-based：**小型變更直接提交到 `main`**（push 時 CI 會執行）。只有高風險變更才開 `feature/`、`bugfix/`、`refactor/` 等分支加 PR（CI 設定、大型功能、跨模組重構、依賴大版本升級）。Commit 遵循 **Conventional Commits**（`<type>(<scope>): <subject>`，祈使句、字首小寫、結尾不加句號）。完整細節與 PR 加 label 步驟見 `docs/agents/05-git-workflow.md`。
+Trunk-based：**小型變更直接提交到 `main`**（push 時 CI 會執行）。只有高風險變更才開 `feature/`、`bugfix/`、`refactor/` 等分支加 PR（CI 設定、大型功能、跨模組重構、依賴大版本升級）。Commit 遵循 **Conventional Commits**（`<type>(<scope>): <subject>`，祈使句、字首小寫、結尾不加句號）。PR 一律以 **rebase merge** 合併（與上游 `SpringBoot` 一致）。完整細節與 PR 加 label 步驟見 `docs/agents/05-git-workflow.md`。
